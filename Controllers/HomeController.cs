@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using jogoEmprestado.Models;
 using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Components;
+using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace jogoEmprestado.Controllers
 {
@@ -22,32 +25,47 @@ namespace jogoEmprestado.Controllers
 
         public IActionResult Index()
         {
-           // ViewData[Envia];
+            var model = new Jogo
+            {
+                consolePc = "PC",
+                nome = "maxpayne",
+                entrega = DateTime.Now.AddDays(7)
+            };
+
+            // ViewData[Envia];
 
             //foi mal
-            if(_jogo != null)
-            {
-                Envia((Jogo)_jogo);
-            }
-            return View();
+            //if(_jogo != null)
+            //{
+           Envia(model);
+            //}
+            return View(model);
         }
         [HttpPost]
-        public HttpPostAttribute Envia(Jogo jogo)
-        {
-            try
+        [ValidateAntiForgeryToken]
+        public IActionResult Envia(Jogo jogo)
+        {    if(ModelState.IsValid)
             {
-                if (jogo.entrega > DateTime.Now && jogo.entrega != null)
+            
+                try
                 {
-                    View(jogo);
-                }
+                    if (jogo.entrega >= DateTime.Now && jogo.entrega != null)
+                    {
+                        View(jogo);
+                    }
                 
-                return (ViewBag.jogo);
+                    return (ViewBag.jogo);
+                }
+                catch(Exception e)
+                {
+                    throw new Exception("erro");
+                }
             }
-            catch(Exception e)
+            else
             {
-                throw new Exception("erro");                
+                return (View("obrigado", jogo));
             }
-           
+
         }
 
         public IActionResult Privacy()
